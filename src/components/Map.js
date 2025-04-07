@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '../styles/Map.css';
@@ -11,15 +11,16 @@ function Map({ onPointSelect }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const [activeLine, setActiveLine] = useState('blue-line');
 
   // Начальные координаты центра Перми
-  const [lng] = useState(56.2502); // долгота
-  const [lat] = useState(58.0105); // широта
+  const [lng] = useState(58.0105); // долгота
+  const [lat] = useState(56.2502); // широта
   const [zoom] = useState(12); // уровень масштабирования
 
-  // Обработчик клика по точке на карте
-  const handlePointClick = (e) => {
+  // Обработчик клика по точке на карте с useCallback для стабильной ссылки на функцию
+  const handlePointClick = useCallback((e) => {
+    if (!map.current) return;
+    
     const features = map.current.queryRenderedFeatures(e.point, {
       layers: ['blue-points']
     });
@@ -29,7 +30,6 @@ function Map({ onPointSelect }) {
     }
 
     const feature = features[0];
-    const coordinates = feature.geometry.coordinates.slice();
     const { id } = feature.properties;
 
     // Вместо создания всплывающего окна, сразу вызываем callback с данными точки
@@ -37,16 +37,37 @@ function Map({ onPointSelect }) {
     if (point && onPointSelect) {
       onPointSelect(point);
     }
-  };
+  }, [onPointSelect]);
 
   // Инициализация карты при монтировании компонента
   useEffect(() => {
     if (map.current) return; // если карта уже инициализирована, выходим
     
+    console.log('Initializing map with coordinates:', { lng, lat, zoom });
+    
     // Создаем карту
     map.current = new maplibregl.Map({
       container: mapContainer.current,
-      style: 'https://demotiles.maplibre.org/style.json', // временный стиль (заменим на кастомный)
+      style: {
+        version: 8,
+        sources: {
+          osm: {
+            type: 'raster',
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }
+        },
+        layers: [
+          {
+            id: 'osm',
+            type: 'raster',
+            source: 'osm',
+            minzoom: 0,
+            maxzoom: 19
+          }
+        ]
+      },
       center: [lng, lat],
       zoom: zoom,
       attributionControl: false
@@ -58,10 +79,52 @@ function Map({ onPointSelect }) {
       compact: true
     }));
 
+    // Добавляем обработчик ошибок
+    map.current.on('error', (e) => {
+      console.error('MapLibre GL Error:', e);
+    });
+
     // Обработчик загрузки карты
     map.current.on('load', () => {
       console.log('Map loaded successfully');
       setIsMapLoaded(true);
+      
+      // Логируем доступные данные для точек
+      console.log('Blue line points data:', blueLineData.points);
+      
+      // Создаем линию между точками
+      if (blueLineData.points.length >= 2) {
+        const lineCoordinates = blueLineData.points.map(point => point.coordinates);
+        
+        map.current.addSource('blue-line-route', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: lineCoordinates
+            }
+          }
+        });
+        
+        map.current.addLayer({
+          id: 'blue-line-route',
+          type: 'line',
+          source: 'blue-line-route',
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          paint: {
+            'line-color': blueLineData.color,
+            'line-width': 4,
+            'line-opacity': 0.8
+          }
+        });
+        
+        console.log('Added line between points:', lineCoordinates);
+      }
       
       // Добавляем источник данных для синей линии
       map.current.addSource('blue-line-source', {

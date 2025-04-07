@@ -13,7 +13,7 @@
   right: 0;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .map-loader {
@@ -25,12 +25,28 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(245, 245, 245, 0.8);
+  background-color: rgba(245, 245, 245, 0.9);
   z-index: 10;
   border-radius: 12px;
   color: #0088cc;
   font-size: 18px;
   font-weight: 500;
+}
+
+/* Стили для точек интереса */
+.map-point {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #0088cc;
+  border: 3px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.map-point:hover {
+  transform: scale(1.1);
 }
 
 /* Стили для элементов управления карты */
