@@ -198,7 +198,7 @@ function Map({ onPointSelect }) {
         map.current = null;
       }
     };
-  }, [lng, lat, zoom, onPointSelect]);
+  }, [lng, lat, zoom, onPointSelect, handlePointClick]);
 
   return (
     <div className="map-container">
