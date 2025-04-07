@@ -1,69 +1,120 @@
-.point-card {
+.point-card-overlay {
   position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
-  background-color: white;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-  z-index: 100;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 20px;
-  animation: slideUp 0.3s ease-in-out;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  backdrop-filter: blur(4px);
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
+.point-card-overlay.visible {
+  opacity: 1;
+}
+
+.point-card-overlay.hidden {
+  opacity: 0;
+}
+
+.point-card-fullscreen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  background-color: white;
+  z-index: 1001;
+  overflow-y: auto;
+  padding: 24px;
+  transform: translateY(30px);
+  opacity: 0;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.point-card-fullscreen.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.point-card-fullscreen.hidden {
+  transform: translateY(30px);
+  opacity: 0;
 }
 
 .point-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 10;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .point-card-header h2 {
   margin: 0;
   color: #0088cc;
-  font-size: 22px;
+  font-size: 24px;
+  font-weight: 600;
 }
 
 .close-button {
-  background: none;
+  width: 40px;
+  height: 40px;
+  background-color: #f0f4f8;
   border: none;
-  font-size: 28px;
-  color: #777;
+  border-radius: 50%;
+  font-size: 24px;
+  color: #444;
   cursor: pointer;
-  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background-color: #e0e5ea;
+  transform: scale(1.05);
 }
 
 .point-card-image {
   width: 100%;
-  height: 200px;
+  height: 300px;
   border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 15px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .point-card-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.point-card-image:hover img {
+  transform: scale(1.05);
 }
 
 .point-card-audioguide {
-  margin-bottom: 15px;
+  margin-bottom: 24px;
 }
 
 .audio-item {
-  margin: 10px 0;
+  margin: 12px 0;
 }
 
 .play-button {
@@ -71,73 +122,167 @@
   color: white;
   border: none;
   border-radius: 50px;
-  padding: 10px 15px;
+  padding: 12px 20px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 136, 204, 0.3);
+}
+
+.play-button:hover {
+  background-color: #006699;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 136, 204, 0.4);
+}
+
+.play-button:active {
+  transform: translateY(0);
+}
+
+.play-icon {
+  font-size: 16px;
 }
 
 .point-card-tabs {
   display: flex;
   border-bottom: 1px solid #eee;
-  margin-bottom: 15px;
+  margin-bottom: 24px;
+  position: relative;
 }
 
 .tab-button {
   flex: 1;
   background: none;
   border: none;
-  padding: 12px 5px;
+  padding: 16px 5px;
   cursor: pointer;
   color: #777;
-  font-size: 14px;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s;
+  font-size: 16px;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.3s ease;
+}
+
+.tab-button:before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #0088cc;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  transform-origin: center;
 }
 
 .tab-button.active {
   color: #0088cc;
-  border-bottom: 2px solid #0088cc;
-  font-weight: bold;
+}
+
+.tab-button.active:before {
+  transform: scaleX(1);
+}
+
+.tab-button span {
+  position: relative;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.tab-button:hover span {
+  transform: translateY(-2px);
+}
+
+.tab-button.active span {
+  transform: translateY(-2px);
 }
 
 .point-card-content {
-  padding: 10px 0;
+  padding: 0;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  flex: 1;
+}
+
+.point-card-content.transitioning {
+  opacity: 0;
 }
 
 .tab-content {
-  line-height: 1.6;
+  line-height: 1.8;
   color: #333;
+  font-size: 16px;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .photos-content {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  animation: fadeIn 0.5s ease;
 }
 
 .photo-item {
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  animation: fadeScale 0.5s ease;
+  animation-fill-mode: both;
+}
+
+@keyframes fadeScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.photo-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .photo-item img {
   width: 100%;
-  height: auto;
+  height: 180px;
+  object-fit: cover;
   display: block;
+  transition: transform 0.5s ease;
+}
+
+.photo-item:hover img {
+  transform: scale(1.05);
 }
 
 .photo-title {
-  padding: 10px;
+  padding: 15px;
   margin: 0;
-  background-color: #f7f7f7;
-  font-size: 14px;
-  color: #444;
+  background-color: #f7f9fc;
+  font-size: 15px;
+  color: #333;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -146,7 +291,15 @@
 .historical-badge {
   background-color: #ffd700;
   color: #333;
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 10px;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+.historical-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
 } 
