@@ -7,7 +7,7 @@ import blueLineData from '../data/blueLineData';
 /**
  * Компонент карты для отображения интерактивных линий Перми
  */
-function Map({ onPointSelect }) {
+function Map({ onPointSelect, hideControls }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
@@ -73,11 +73,13 @@ function Map({ onPointSelect }) {
       attributionControl: false
     });
 
-    // Добавляем контроллеры
-    map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
-    map.current.addControl(new maplibregl.AttributionControl({
-      compact: true
-    }));
+    // Добавляем контроллеры только если не требуется их скрыть
+    if (!hideControls) {
+      map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
+      map.current.addControl(new maplibregl.AttributionControl({
+        compact: true
+      }));
+    }
 
     // Добавляем обработчик ошибок
     map.current.on('error', (e) => {
@@ -198,7 +200,7 @@ function Map({ onPointSelect }) {
         map.current = null;
       }
     };
-  }, [lng, lat, zoom, onPointSelect, handlePointClick]);
+  }, [lng, lat, zoom, onPointSelect, handlePointClick, hideControls]);
 
   return (
     <div className="map-container">
@@ -211,5 +213,10 @@ function Map({ onPointSelect }) {
     </div>
   );
 }
+
+// Устанавливаем значения пропсов по умолчанию
+Map.defaultProps = {
+  hideControls: false
+};
 
 export default Map; 

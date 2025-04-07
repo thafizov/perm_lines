@@ -8,6 +8,7 @@ import './App.css';
 
 function App() {
   const [selectedPoint, setSelectedPoint] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     // Инициализируем Telegram WebApp
@@ -42,15 +43,33 @@ function App() {
     setSelectedPoint(null);
   };
 
+  // Показывает/скрывает информационный баннер
+  const toggleInfo = () => {
+    setShowInfo(!showInfo);
+  };
+
   return (
     <div className="App">
       <main className="App-main">
-        <UserGreeting />
+        {/* Убираем UserGreeting из основного потока */}
         
-        {/* Заменяем плейсхолдер карты на компонент Map */}
-        <div className="map-wrapper">
-          <Map onPointSelect={setSelectedPoint} />
+        {/* Карта на весь экран */}
+        <div className="map-wrapper fullscreen">
+          <Map onPointSelect={setSelectedPoint} hideControls={true} />
         </div>
+
+        {/* Кнопка информации */}
+        <button className="info-button" onClick={toggleInfo}>
+          ℹ️
+        </button>
+
+        {/* Информационный баннер (появляется при клике) */}
+        {showInfo && (
+          <div className="info-panel">
+            <button className="close-button" onClick={toggleInfo}>×</button>
+            <UserGreeting />
+          </div>
+        )}
 
         {/* Показываем карточку только если выбрана точка */}
         {selectedPoint && (
