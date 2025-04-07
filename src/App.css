@@ -1,0 +1,80 @@
+.App {
+  text-align: center;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+}
+
+.App-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px;
+}
+
+.greeting {
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 500px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.greeting h2 {
+  margin: 0 0 10px 0;
+  color: #0088cc; /* Цвет Telegram */
+  font-size: 24px;
+}
+
+.greeting p {
+  margin: 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.greeting small {
+  display: block;
+  margin-top: 10px;
+  color: #777;
+  font-size: 12px;
+}
+
+.greeting-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  width: 100%;
+  color: #777;
+}
+
+.map-placeholder {
+  width: 90%;
+  height: 300px;
+  max-width: 500px;
+  background-color: #e0e0e0;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
