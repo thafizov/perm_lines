@@ -1,0 +1,150 @@
+.audio-player {
+  position: fixed;
+  z-index: 1000;
+  background-color: white;
+  box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  left: 0;
+}
+
+/* Полноразмерный плеер */
+.audio-player:not(.minimized) {
+  bottom: 0;
+  height: auto;
+  padding: 15px;
+  border-radius: 16px 16px 0 0;
+}
+
+/* Минимизированный плеер */
+.audio-player.minimized {
+  bottom: 0;
+  height: 50px;
+  padding: 0 15px;
+}
+
+.mini-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.mini-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin: 0 15px;
+  overflow: hidden;
+}
+
+.mini-title {
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #0088cc;
+}
+
+.mini-time {
+  font-size: 10px;
+  color: #777;
+}
+
+.full-player {
+  display: flex;
+  flex-direction: column;
+}
+
+.player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.audio-title {
+  margin: 0;
+  color: #0088cc;
+  font-size: 18px;
+}
+
+.player-controls-top {
+  display: flex;
+  gap: 10px;
+}
+
+.player-progress {
+  margin-bottom: 15px;
+}
+
+.progress-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+  outline: none;
+  margin-bottom: 5px;
+}
+
+.progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  background: #0088cc;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #777;
+}
+
+.player-controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+/* Кнопки */
+.play-pause-button {
+  border: none;
+  background: #0088cc;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.play-pause-button.large {
+  width: 50px;
+  height: 50px;
+  font-size: 18px;
+}
+
+.minimize-button, 
+.maximize-button, 
+.close-button {
+  border: none;
+  background: #f0f0f0;
+  color: #555;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 0;
+} 
