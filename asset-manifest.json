@@ -1,15 +1,16 @@
 {
   "files": {
-    "main.css": "/perm_lines/static/css/main.5c863202.css",
-    "main.js": "/perm_lines/static/js/main.d97a8d7d.js",
+    "main.css": "/perm_lines/static/css/main.cbd5d600.css",
+    "main.js": "/perm_lines/static/js/main.59528868.js",
     "static/js/453.67ffcf2a.chunk.js": "/perm_lines/static/js/453.67ffcf2a.chunk.js",
+    "static/media/dom-meshkova.png": "/perm_lines/static/media/dom-meshkova.48b75da5687cc733a675.png",
     "index.html": "/perm_lines/index.html",
-    "main.5c863202.css.map": "/perm_lines/static/css/main.5c863202.css.map",
-    "main.d97a8d7d.js.map": "/perm_lines/static/js/main.d97a8d7d.js.map",
+    "main.cbd5d600.css.map": "/perm_lines/static/css/main.cbd5d600.css.map",
+    "main.59528868.js.map": "/perm_lines/static/js/main.59528868.js.map",
     "453.67ffcf2a.chunk.js.map": "/perm_lines/static/js/453.67ffcf2a.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.5c863202.css",
-    "static/js/main.d97a8d7d.js"
+    "static/css/main.cbd5d600.css",
+    "static/js/main.59528868.js"
   ]
 }
