@@ -4,17 +4,32 @@
 
 // Проверяет, запущено ли приложение в Telegram WebApp
 export const isTelegramWebApp = () => {
-  return window.Telegram && window.Telegram.WebApp;
+  const isAvailable = window.Telegram && window.Telegram.WebApp;
+  console.log('Telegram WebApp available:', isAvailable);
+  return isAvailable;
 };
 
 // Получение данных пользователя Telegram
 export const getTelegramUser = () => {
   if (isTelegramWebApp()) {
     const webApp = window.Telegram.WebApp;
-    return webApp.initDataUnsafe && webApp.initDataUnsafe.user 
-      ? webApp.initDataUnsafe.user 
-      : null;
+    
+    // Проверяем наличие данных пользователя
+    if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
+      console.log('Telegram user data:', webApp.initDataUnsafe.user);
+      return webApp.initDataUnsafe.user;
+    } else {
+      console.log('Telegram WebApp available, but no user data found');
+      
+      // Отладочная информация о доступных данных
+      if (webApp.initDataUnsafe) {
+        console.log('Available initDataUnsafe:', webApp.initDataUnsafe);
+      }
+      
+      return null;
+    }
   }
+  console.log('Telegram WebApp not available, cannot get user');
   return null;
 };
 

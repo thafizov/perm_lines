@@ -8,14 +8,24 @@ import telegramWebApp from '../utils/telegramWebApp';
 function UserGreeting() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [telegramStatus, setTelegramStatus] = useState('Проверка...');
 
   useEffect(() => {
-    // Инициализируем Telegram WebApp
-    telegramWebApp.init();
+    // Проверяем доступность Telegram WebApp
+    const isTelegramAvailable = telegramWebApp.isAvailable();
     
-    // Получаем данные пользователя
-    const telegramUser = telegramWebApp.getUser();
-    setUser(telegramUser);
+    if (isTelegramAvailable) {
+      // Инициализируем Telegram WebApp
+      telegramWebApp.init();
+      
+      // Получаем данные пользователя
+      const telegramUser = telegramWebApp.getUser();
+      setUser(telegramUser);
+      setTelegramStatus('Подключено к Telegram WebApp');
+    } else {
+      setTelegramStatus('Запущено вне Telegram');
+    }
+    
     setIsLoading(false);
   }, []);
 
@@ -28,6 +38,12 @@ function UserGreeting() {
       <div className="greeting">
         <h2>Привет, {user.first_name}!</h2>
         <p>Добро пожаловать в интерактивные линии Перми</p>
+        <div className="user-details">
+          <p><strong>ID:</strong> {user.id}</p>
+          {user.username && <p><strong>Username:</strong> @{user.username}</p>}
+          {user.language_code && <p><strong>Язык:</strong> {user.language_code}</p>}
+        </div>
+        <div className="telegram-status">{telegramStatus}</div>
       </div>
     );
   }
@@ -37,6 +53,7 @@ function UserGreeting() {
       <h2>Привет, Гость!</h2>
       <p>Добро пожаловать в интерактивные линии Перми</p>
       <small>Для полного доступа к функциям, запустите приложение через Telegram</small>
+      <div className="telegram-status">{telegramStatus}</div>
     </div>
   );
 }
