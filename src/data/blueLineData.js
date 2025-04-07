@@ -13,7 +13,7 @@ const blueLineData = {
       id: 'blue-1',
       name: 'Речной вокзал Перми',
       description: 'Историческое здание речного вокзала - архитектурная достопримечательность Перми',
-      coordinates: [58.0105, 56.2470], // [lng, lat]
+      coordinates: [56.230833, 58.012137], // [lng, lat] - Речной вокзал
       image: 'https://via.placeholder.com/300x200?text=Речной+вокзал',
       audioGuide: [
         {
@@ -46,7 +46,7 @@ const blueLineData = {
       id: 'blue-2',
       name: 'Театр-Театр',
       description: 'Пермский академический Театр-Театр - один из старейших и известнейших театров Урала',
-      coordinates: [58.0085, 56.2532], // [lng, lat]
+      coordinates: [56.246278, 58.009675], // [lng, lat] - Театр-Театр на Ленина
       image: 'https://via.placeholder.com/300x200?text=Театр-Театр',
       audioGuide: [
         {

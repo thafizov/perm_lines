@@ -5,8 +5,22 @@
 // Проверяет, запущено ли приложение в Telegram WebApp
 export const isTelegramWebApp = () => {
   const isAvailable = window.Telegram && window.Telegram.WebApp;
-  console.log('Telegram WebApp available:', isAvailable);
-  return isAvailable;
+  
+  // Дополнительная проверка для исключения ложных срабатываний
+  const hasValidInitData = isAvailable && 
+                          window.Telegram.WebApp.initData && 
+                          window.Telegram.WebApp.initData.length > 0;
+  
+  // В режиме разработки объект может быть доступен, но без реальных данных
+  const isRealTelegramWebApp = isAvailable && hasValidInitData;
+  
+  console.log('Telegram WebApp check:', { 
+    isAvailable, 
+    hasValidInitData, 
+    isRealTelegramWebApp 
+  });
+  
+  return isRealTelegramWebApp;
 };
 
 // Получение данных пользователя Telegram

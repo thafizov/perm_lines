@@ -23,7 +23,13 @@ function UserGreeting() {
       setUser(telegramUser);
       setTelegramStatus('Подключено к Telegram WebApp');
     } else {
-      setTelegramStatus('Запущено вне Telegram');
+      // Определяем режим запуска (локальный или на GitHub Pages)
+      const isLocalhost = window.location.hostname === 'localhost' || 
+                          window.location.hostname === '127.0.0.1';
+      
+      setTelegramStatus(isLocalhost 
+        ? 'Режим локальной разработки'
+        : 'Запущено в браузере (без Telegram)');
     }
     
     setIsLoading(false);

@@ -1,14 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import UserGreeting from './components/UserGreeting';
 import Map from './components/Map';
 import PointCard from './components/PointCard';
+import UserGreeting from './components/UserGreeting';
+import SideMenu from './components/SideMenu';
 import telegramWebApp from './utils/telegramWebApp';
 import blueLineData from './data/blueLineData';
+import greenLineData from './data/greenLineData';
+import redLineData from './data/redLineData';
 import './App.css';
 
 function App() {
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeLine, setActiveLine] = useState('blue-line');
+
+  // Данные для разных линий
+  const lineDataMap = {
+    'blue-line': blueLineData,
+    'green-line': greenLineData,
+    'red-line': redLineData
+  };
+  
+  // Текущие данные активной линии
+  const activeLineData = lineDataMap[activeLine];
 
   useEffect(() => {
     // Инициализируем Telegram WebApp
@@ -34,8 +49,8 @@ function App() {
 
   // Функция для поиска точки по ID
   const findPointById = (pointId) => {
-    // Пока работаем только с синей линией
-    return blueLineData.points.find(point => point.id === pointId);
+    // Поиск в активной линии
+    return activeLineData.points.find(point => point.id === pointId);
   };
 
   // Закрывает карточку с деталями точки
@@ -48,20 +63,46 @@ function App() {
     setShowInfo(!showInfo);
   };
 
+  // Открывает/закрывает меню
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  // Обрабатывает выбор линии
+  const handleLineSelect = (lineId) => {
+    setActiveLine(lineId);
+    setSelectedPoint(null); // Сбрасываем выбранную точку при смене линии
+  };
+
   return (
     <div className="App">
       <main className="App-main">
-        {/* Убираем UserGreeting из основного потока */}
-        
         {/* Карта на весь экран */}
         <div className="map-wrapper fullscreen">
-          <Map onPointSelect={setSelectedPoint} hideControls={true} />
+          <Map 
+            onPointSelect={setSelectedPoint} 
+            hideControls={true} 
+            lineData={activeLineData}
+          />
         </div>
+
+        {/* Кнопка меню */}
+        <button className="menu-button" onClick={toggleMenu}>
+          <span className="menu-icon"></span>
+        </button>
 
         {/* Кнопка информации */}
         <button className="info-button" onClick={toggleInfo}>
           ℹ️
         </button>
+
+        {/* Боковое меню */}
+        <SideMenu 
+          isOpen={menuOpen} 
+          onClose={() => setMenuOpen(false)} 
+          activeLine={activeLine}
+          onSelectLine={handleLineSelect}
+        />
 
         {/* Информационный баннер (появляется при клике) */}
         {showInfo && (

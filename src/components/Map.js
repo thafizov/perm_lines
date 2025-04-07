@@ -2,27 +2,29 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '../styles/Map.css';
-import blueLineData from '../data/blueLineData';
 
 /**
  * Компонент карты для отображения интерактивных линий Перми
  */
-function Map({ onPointSelect, hideControls }) {
+function Map({ onPointSelect, hideControls, lineData }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [activeLineId, setActiveLineId] = useState(null);
 
-  // Начальные координаты центра Перми
-  const [lng] = useState(58.0105); // долгота
-  const [lat] = useState(56.2502); // широта
+  // Начальные координаты центра Перми (точные координаты из Яндекс.Карт)
+  const [lng] = useState(56.256681); // долгота
+  const [lat] = useState(58.015129); // широта
   const [zoom] = useState(12); // уровень масштабирования
 
   // Обработчик клика по точке на карте с useCallback для стабильной ссылки на функцию
   const handlePointClick = useCallback((e) => {
-    if (!map.current) return;
+    if (!map.current || !lineData) return;
+    
+    const pointLayerId = `${lineData.id}-points`;
     
     const features = map.current.queryRenderedFeatures(e.point, {
-      layers: ['blue-points']
+      layers: [pointLayerId]
     });
 
     if (!features.length) {
@@ -32,12 +34,169 @@ function Map({ onPointSelect, hideControls }) {
     const feature = features[0];
     const { id } = feature.properties;
 
-    // Вместо создания всплывающего окна, сразу вызываем callback с данными точки
-    const point = blueLineData.points.find(p => p.id === id);
+    // Находим точку в данных линии
+    const point = lineData.points.find(p => p.id === id);
     if (point && onPointSelect) {
       onPointSelect(point);
     }
-  }, [onPointSelect]);
+  }, [onPointSelect, lineData]);
+
+  // Очистка всех слоев и источников линий
+  const clearLineLayers = useCallback(() => {
+    if (!map.current || !isMapLoaded) return;
+
+    // Удаляем слои и источники предыдущей линии, если они существуют
+    if (activeLineId) {
+      try {
+        const layers = [
+          `${activeLineId}-route`,
+          `${activeLineId}-points`,
+          `${activeLineId}-points-numbers`
+        ];
+        
+        // Удаляем слои
+        layers.forEach(layerId => {
+          if (map.current.getLayer(layerId)) {
+            map.current.removeLayer(layerId);
+          }
+        });
+        
+        // Удаляем источники
+        const sources = [
+          `${activeLineId}-route-source`,
+          `${activeLineId}-points-source`
+        ];
+        
+        sources.forEach(sourceId => {
+          if (map.current.getSource(sourceId)) {
+            map.current.removeSource(sourceId);
+          }
+        });
+        
+        // Удаляем обработчики событий
+        map.current.off('click', `${activeLineId}-points`, handlePointClick);
+        map.current.off('mouseenter', `${activeLineId}-points`);
+        map.current.off('mouseleave', `${activeLineId}-points`);
+      } catch (error) {
+        console.error('Error clearing line layers:', error);
+      }
+    }
+  }, [activeLineId, isMapLoaded, handlePointClick]);
+
+  // Добавление слоев для новой линии
+  const addLineLayers = useCallback(() => {
+    if (!map.current || !isMapLoaded || !lineData) return;
+    
+    const lineId = lineData.id;
+    
+    try {
+      console.log(`Adding layers for line: ${lineId}`);
+      
+      // Добавляем источник данных для точек
+      map.current.addSource(`${lineId}-points-source`, {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: lineData.points.map(point => ({
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: point.coordinates
+            },
+            properties: {
+              id: point.id,
+              name: point.name,
+              description: point.description,
+              image: point.image
+            }
+          }))
+        }
+      });
+      
+      // Добавляем слой с точками линии
+      map.current.addLayer({
+        id: `${lineId}-points`,
+        type: 'circle',
+        source: `${lineId}-points-source`,
+        paint: {
+          'circle-radius': 12,
+          'circle-color': lineData.color,
+          'circle-opacity': 0.8,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff'
+        }
+      });
+      
+      // Добавляем слой с номерами точек
+      map.current.addLayer({
+        id: `${lineId}-points-numbers`,
+        type: 'symbol',
+        source: `${lineId}-points-source`,
+        layout: {
+          'text-field': ['get', 'id'],
+          'text-font': ['Open Sans Bold'],
+          'text-size': 12,
+          'text-anchor': 'center'
+        },
+        paint: {
+          'text-color': '#ffffff'
+        }
+      });
+      
+      // Создаем линию между точками
+      if (lineData.points.length >= 2) {
+        const lineCoordinates = lineData.points.map(point => point.coordinates);
+        
+        map.current.addSource(`${lineId}-route-source`, {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: lineCoordinates
+            }
+          }
+        });
+        
+        map.current.addLayer({
+          id: `${lineId}-route`,
+          type: 'line',
+          source: `${lineId}-route-source`,
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          paint: {
+            'line-color': lineData.color,
+            'line-width': 4,
+            'line-opacity': 0.8
+          }
+        });
+        
+        console.log(`Added line between ${lineData.points.length} points:`, lineCoordinates);
+      }
+      
+      // Добавляем обработчик клика по точке
+      map.current.on('click', `${lineId}-points`, handlePointClick);
+      
+      // Изменяем курсор при наведении на точку
+      map.current.on('mouseenter', `${lineId}-points`, () => {
+        map.current.getCanvas().style.cursor = 'pointer';
+      });
+      
+      // Возвращаем стандартный курсор при уходе с точки
+      map.current.on('mouseleave', `${lineId}-points`, () => {
+        map.current.getCanvas().style.cursor = '';
+      });
+      
+      // Обновляем ID активной линии
+      setActiveLineId(lineId);
+      
+    } catch (error) {
+      console.error('Error adding line layers:', error);
+    }
+  }, [lineData, isMapLoaded, handlePointClick]);
 
   // Инициализация карты при монтировании компонента
   useEffect(() => {
@@ -53,9 +212,9 @@ function Map({ onPointSelect, hideControls }) {
         sources: {
           osm: {
             type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tiles: ['https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],
             tileSize: 256,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions">CARTO</a>'
           }
         },
         layers: [
@@ -85,112 +244,11 @@ function Map({ onPointSelect, hideControls }) {
     map.current.on('error', (e) => {
       console.error('MapLibre GL Error:', e);
     });
-
+    
     // Обработчик загрузки карты
     map.current.on('load', () => {
       console.log('Map loaded successfully');
       setIsMapLoaded(true);
-      
-      // Логируем доступные данные для точек
-      console.log('Blue line points data:', blueLineData.points);
-      
-      // Создаем линию между точками
-      if (blueLineData.points.length >= 2) {
-        const lineCoordinates = blueLineData.points.map(point => point.coordinates);
-        
-        map.current.addSource('blue-line-route', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: lineCoordinates
-            }
-          }
-        });
-        
-        map.current.addLayer({
-          id: 'blue-line-route',
-          type: 'line',
-          source: 'blue-line-route',
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round'
-          },
-          paint: {
-            'line-color': blueLineData.color,
-            'line-width': 4,
-            'line-opacity': 0.8
-          }
-        });
-        
-        console.log('Added line between points:', lineCoordinates);
-      }
-      
-      // Добавляем источник данных для синей линии
-      map.current.addSource('blue-line-source', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: blueLineData.points.map(point => ({
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: point.coordinates
-            },
-            properties: {
-              id: point.id,
-              name: point.name,
-              description: point.description,
-              image: point.image
-            }
-          }))
-        }
-      });
-
-      // Добавляем слой с точками синей линии
-      map.current.addLayer({
-        id: 'blue-points',
-        type: 'circle',
-        source: 'blue-line-source',
-        paint: {
-          'circle-radius': 12,
-          'circle-color': blueLineData.color,
-          'circle-opacity': 0.8,
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#ffffff'
-        }
-      });
-
-      // Добавляем слой с номерами точек
-      map.current.addLayer({
-        id: 'blue-points-numbers',
-        type: 'symbol',
-        source: 'blue-line-source',
-        layout: {
-          'text-field': ['get', 'id'],
-          'text-font': ['Open Sans Bold'],
-          'text-size': 12,
-          'text-anchor': 'center'
-        },
-        paint: {
-          'text-color': '#ffffff'
-        }
-      });
-
-      // Добавляем обработчик клика по точке
-      map.current.on('click', 'blue-points', handlePointClick);
-
-      // Изменяем курсор при наведении на точку
-      map.current.on('mouseenter', 'blue-points', () => {
-        map.current.getCanvas().style.cursor = 'pointer';
-      });
-
-      // Возвращаем стандартный курсор при уходе с точки
-      map.current.on('mouseleave', 'blue-points', () => {
-        map.current.getCanvas().style.cursor = '';
-      });
     });
 
     // Очистка при размонтировании
@@ -200,7 +258,21 @@ function Map({ onPointSelect, hideControls }) {
         map.current = null;
       }
     };
-  }, [lng, lat, zoom, onPointSelect, handlePointClick, hideControls]);
+  }, [lng, lat, zoom, hideControls]);
+
+  // Обновление слоев при изменении lineData
+  useEffect(() => {
+    if (!map.current || !isMapLoaded || !lineData) return;
+    
+    console.log('Line data changed:', lineData.id);
+    
+    // Очищаем предыдущие слои
+    clearLineLayers();
+    
+    // Добавляем новые слои
+    addLineLayers();
+    
+  }, [lineData, isMapLoaded, clearLineLayers, addLineLayers]);
 
   return (
     <div className="map-container">
